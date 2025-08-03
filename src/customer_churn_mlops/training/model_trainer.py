@@ -85,11 +85,10 @@ def train_model(X_train_filtered, y_train, X_test_filtered, y_test, final_scaler
     )
 
     # 3. Train the final model
+    start_time = time.time()
     final_model = fit_final_model_without_smote(best_lrr, X_train_filtered, y_train)
 
     # 4. Final model logging (without SMOTE)
-    import time
-    start_time = time.time()
     end_time = time.time()
     training_time = end_time - start_time
 
