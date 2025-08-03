@@ -12,60 +12,12 @@ from customer_churn_mlops.utils.mlflow_configs import display_and_log_metrics
 
 
 def print_best_score_params(model):
-    """
-    Prints the best score and hyperparameters of a fitted model.
-
-    Parameters
-    ----------
-    model : object
-        The model object, which must have `best_score_` and `best_params_` attributes.
-    """
     print("Best Score: ", model.best_score_)
     print("Best Hyperparameters: ", model.best_params_)
 
 
-def optimize_and_log_model(model, search_space, model_name, X_train, y_train,
-                           X_test, y_test, developer, scaler_path, features_path,
+def optimize_model(model, search_space, X_train, y_train,
                            n_iter=25, cv=5, scoring=["f1_weighted", "roc_auc", "recall"]):
-    """
-    Perform hyperparameter optimization and log the best model and metrics.
-
-    Parameters
-    ----------
-    model : sklearn.base.BaseEstimator
-        The model to optimize.
-    search_space : dict
-        The hyperparameter search space.
-    model_name : str
-        The name of the model.
-    X_train : pandas.DataFrame
-        The training data.
-    y_train : pandas.Series
-        The training labels.
-    X_test : pandas.DataFrame
-        The test data.
-    y_test : pandas.Series
-        The test labels.
-    developer : str
-        The name of the developer.
-    scaler_path : str
-        The path to the scaler.
-    features_path : str
-        The path to the features.
-    n_iter : int
-        The number of iterations to run the optimization.
-    cv : int
-        The number of folds for the cross-validation.
-    scoring : list of str
-        The metrics to use for optimization.
-
-    Returns
-    -------
-    best_model : sklearn.base.BaseEstimator
-        The best model.
-    search : skopt.BayesSearchCV
-        The optimization object.
-    """
     search = BayesSearchCV(
         estimator=clone(model),
         search_spaces=search_space,
@@ -83,28 +35,34 @@ def optimize_and_log_model(model, search_space, model_name, X_train, y_train,
 
     best_model = search.best_estimator_
 
+    return best_model
 
-    start_time = time.time()
-    best_model.fit(X_train, y_train)
-    end_time = time.time()
 
-    trainging_time = end_time - start_time
+def fit_final_model_without_smote(best_pipeline, X_train, y_train):
+    # 1. Extract the best hyperparameters
+    clf_params = {
+        k.replace("clf__", ""): v
+        for k, v in best_pipeline.get_params().items()
+        if k.startswith("clf__")
+    }
 
-    run_id = display_and_log_metrics(
-        best_model,
-        scaler_path,
-        model_name,
-        developer,
-        X_train, y_train,
-        X_test, y_test,
-        trainging_time, features_path
-    )
+    # 2. Clone the best classifier and set the hyperparameters
+    final_clf = clone(best_pipeline.named_steps["clf"])
+    final_clf.set_params(**clf_params)
 
-    return best_model, run_id
+    # 3. Apply SMOTE
+    smote = SMOTE(random_state=42)
+    X_train_resampled, y_train_resampled = smote.fit_resample(X_train, y_train)
+
+    # 4. Train the final model
+    final_clf.fit(X_train_resampled, y_train_resampled)
+
+    return final_clf
 
 
 def train_model(X_train_filtered, y_train, X_test_filtered, y_test, final_scaler_path, best_features_path,
                 developer="Cristian"):
+    # 1. Training pipeline with SMOTE
     lr = ImbPipeline([
         ('smote', SMOTE(random_state=42)),
         ('clf', LogisticRegression())
@@ -116,18 +74,34 @@ def train_model(X_train_filtered, y_train, X_test_filtered, y_test, final_scaler
         "clf__tol": Real(1e-5, 1e-1, prior="log-uniform")
     }
 
-    best_lrr, run_id = optimize_and_log_model(
+    # 2. Optimize with SMOTE
+    best_lrr = optimize_model(
         lr,
         lr_search_space,
-        "LogisticRegression",
         X_train_filtered, y_train,
-        X_test_filtered, y_test,
-        developer,
-        final_scaler_path,
-        best_features_path,
         n_iter=25,
         cv=5,
         scoring="recall"
     )
 
-    return best_lrr, run_id
+    # 3. Train the final model
+    final_model = fit_final_model_without_smote(best_lrr, X_train_filtered, y_train)
+
+    # 4. Final model logging (without SMOTE)
+    import time
+    start_time = time.time()
+    end_time = time.time()
+    training_time = end_time - start_time
+
+    run_id = display_and_log_metrics(
+        final_model,
+        final_scaler_path,
+        "LogisticRegression",
+        developer,
+        X_train_filtered, y_train,
+        X_test_filtered, y_test,
+        training_time,
+        best_features_path
+    )
+
+    return final_model, run_id
