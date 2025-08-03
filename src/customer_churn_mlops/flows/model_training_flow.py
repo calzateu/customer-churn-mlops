@@ -142,7 +142,7 @@ def train_model_flow(
         "num__AccountAge", "num__MonthlyCharges", "num__ViewingHoursPerWeek", "num__AverageViewingDuration", "num__ContentDownloadsPerMonth", "num__SupportTicketsPerMonth"
     ],
 ):
-    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5050")
+    tracking_uri: str = os.getenv("MLFLOW_TRACKING_URI", "http://127.0.0.1:5050") # Not 5000 because it's already in use in my Mac
     client = setup_mlflow_task(tracking_uri, experiment_name)
 
     df = read_data_task(data_path)
