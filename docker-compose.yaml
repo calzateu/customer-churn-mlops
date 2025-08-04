@@ -58,6 +58,9 @@ services:
     environment:
       PREFECT_API_URL: http://prefect-server:4200/api
       MLFLOW_TRACKING_URI: http://mlflow:5000
+      MLFLOW_USER: ${MLFLOW_USER:-mlflow_user}
+      MLFLOW_PASS: ${MLFLOW_PASS:-mlflowpass}
+      MYAPP_DB_URL: postgresql://${MLFLOW_USER:-mlflow_user}:${MLFLOW_PASS:-mlflowpass}@postgres:5432/mlflow_db
     volumes:
       - ./data:/app/data
       - ./models:/app/models
