@@ -35,8 +35,9 @@ Based on [this Kaggle dataset](https://www.kaggle.com/datasets/safrin03/predicti
 
 ```
 .
+├──initdb                        # Postgres db initialization
+    └── init-multi-db.sql        # SQL init script for PostgreSQL
 ├── data/                         # Place the Kaggle dataset here (after unzip)
-│   └── init-multi-db.sql        # SQL init script for PostgreSQL
 ├── grafana_provisioning/        # Grafana dashboards, datasources, alerting config
 ├── models/                      # Saved features and preprocessing artifacts
 ├── notebooks/                   # EDA and exploratory analysis notebooks
