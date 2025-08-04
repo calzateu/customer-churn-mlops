@@ -1,0 +1,109 @@
+apiVersion: 1
+groups:
+    - orgId: 1
+      name: decreased recall
+      folder: Customer Churn
+      interval: 15m
+      rules:
+        - uid: beu0kjgzd4934e
+          title: Recall
+          condition: C
+          data:
+            - refId: A
+              relativeTimeRange:
+                from: 18641
+                to: 18455
+              datasourceUid: P44368ADAD746BC27
+              model:
+                datasource:
+                    type: grafana-postgresql-datasource
+                    uid: P44368ADAD746BC27
+                editorMode: code
+                format: table
+                instant: false
+                intervalMs: 60000
+                maxDataPoints: 43200
+                range: true
+                rawQuery: true
+                rawSql: |-
+                    SELECT
+                      r.generated_at AS "time",
+                      (m->>'value')::float AS recall
+                    FROM evidently_reports r,
+                         LATERAL jsonb_array_elements(r.report_json->'metrics') AS m
+                    WHERE r.report_type = 'performance'
+                      AND m->>'metric_id' = 'Recall(conf_matrix=True,pr_curve=False,pr_table=False)'
+                    ORDER BY r.generated_at
+                refId: A
+                sql:
+                    columns:
+                        - parameters: []
+                          type: function
+                    groupBy:
+                        - property:
+                            type: string
+                          type: groupBy
+                    limit: 50
+                table: gr
+            - refId: B
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params: []
+                        type: gt
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - B
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: A
+                intervalMs: 1000
+                maxDataPoints: 43200
+                reducer: last
+                refId: B
+                type: reduce
+            - refId: C
+              datasourceUid: __expr__
+              model:
+                conditions:
+                    - evaluator:
+                        params:
+                            - 0.6
+                        type: lte
+                      operator:
+                        type: and
+                      query:
+                        params:
+                            - C
+                      reducer:
+                        params: []
+                        type: last
+                      type: query
+                datasource:
+                    type: __expr__
+                    uid: __expr__
+                expression: B
+                intervalMs: 1000
+                maxDataPoints: 43200
+                refId: C
+                type: threshold
+          dashboardUid: e22f4f10-2090-4cb7-8f94-3bf7cbb8f8a1
+          panelId: 1
+          noDataState: NoData
+          execErrState: Error
+          for: 15m
+          annotations:
+            __dashboardUid__: e22f4f10-2090-4cb7-8f94-3bf7cbb8f8a1
+            __panelId__: "1"
+            summary: |-
+                Model recall is bellow 0.60
+                Retrain
+          isPaused: false
