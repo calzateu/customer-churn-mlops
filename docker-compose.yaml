@@ -70,7 +70,7 @@ services:
   grafana:
     image: grafana/grafana:latest
     ports:
-      - "3001:3000"
+      - "3001:3000" # Not 3000 because it's already in use in my Mac :v
     depends_on:
       - postgres
     environment:
