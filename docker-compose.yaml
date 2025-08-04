@@ -1,25 +1,51 @@
 services:
+  postgres:
+    image: postgres:15
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpass
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./initdb:/docker-entrypoint-initdb.d
+    ports:
+      - "5432:5432"
+
   prefect-server:
     image: prefecthq/prefect:3.4-python3.12
-    command: prefect server start --host 0.0.0.0
+    command: >
+      bash -c "
+      pip install 'sqlalchemy[asyncio]' psycopg2-binary prefect-sqlalchemy &&
+      prefect server start --host 0.0.0.0"
     ports:
       - "4200:4200"
       - "3000:3000"
     environment:
       PREFECT_UI_URL: http://localhost:4200
     restart: unless-stopped
+    depends_on:
+      - postgres
 
   mlflow:
-    image: ghcr.io/mlflow/mlflow
+    build:
+      context: .
+      dockerfile: Dockerfile.mlflow
     ports:
       - "5050:5000" # Not 5000 because it's already in use in my Mac
     volumes:
-      - ./mlruns:/mlruns
       - ./mlartifacts:/mlartifacts
-      - ./backend.db:/backend.db
+    depends_on:
+      - postgres
+    environment:
+      MLFLOW_USER: ${MLFLOW_USER:-mlflow_user}
+      MLFLOW_PASS: ${MLFLOW_PASS:-mlflowpass}
     command: >
+      bash -c "
       mlflow server
       --host 0.0.0.0
       --port 5000
-      --backend-store-uri sqlite:///backend.db
+      --backend-store-uri postgresql://${MLFLOW_USER:-mlflow_user}:${MLFLOW_PASS:-mlflowpass}@postgres:5432/mlflow_db"
     restart: unless-stopped
+
+volumes:
+  pgdata:

@@ -1,10 +1,15 @@
 # .env can define ports like MLFLOW_PORT=5050
 
 up:
+	mkdir -p ./mlartifacts
 	docker compose up --build
 
 down:
 	docker compose down
+
+down-volumes:
+	docker compose down --volumes
+	rm -rf ./mlartifacts
 
 restart:
 	docker compose down && docker compose up --build
