@@ -1,3 +1,6 @@
+# 📦 Customer Churn Prediction – MLOps Project
+
+
 ## 🧠 Problem Overview
 
 **Customer churn** occurs when users stop using a product or service. For subscription-based businesses, predicting churn is crucial to reduce revenue loss and improve customer retention.
