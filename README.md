@@ -112,6 +112,30 @@ Artifacts from MLflow are stored in `./mlartifacts`.
 
 ---
 
+## 🌐 Service Access & Ports
+
+After running `make up`, you can access the following services in your browser:
+
+| Service       | URL                        | Description                        |
+|---------------|----------------------------|------------------------------------|
+| **MLflow**    | [http://localhost:5050](http://localhost:5050) | Experiment tracking & model registry |
+| **Prefect UI**| [http://localhost:4200](http://localhost:4200) | Flow orchestration dashboard       |
+| **Grafana**   | [http://localhost:3001](http://localhost:3001) | Monitoring dashboards              |
+
+> Note: These ports are mapped in `docker-compose.yaml` and can be changed via the `.env.docker` file if needed.
+
+### 🔌 Exposed Ports Summary
+
+| Port | Service       | Host Mapping        |
+|------|---------------|---------------------|
+| 5432 | PostgreSQL    | `localhost:5432`    |
+| 5050 | MLflow        | `localhost:5050`    |
+| 4200 | Prefect UI    | `localhost:4200`    |
+| 3000 | Prefect API   | `localhost:3000`    |
+| 3001 | Grafana       | `localhost:3001`    |
+
+---
+
 ### ▶️ Run flows
 
 You can manually run any Prefect flow script using:
