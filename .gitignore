@@ -1,6 +1,7 @@
 
 .DS_Store
 mlartifacts/
+reports
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
