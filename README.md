@@ -28,6 +28,36 @@ Based on [this Kaggle dataset](https://www.kaggle.com/datasets/safrin03/predicti
 - Preferences: `GenrePreference`, `ContentType`, `SubscriptionType`
 - Target: `Churn` (1 = churned, 0 = active)
 
+## 📁 Project Structure
+
+```
+.
+├── data/                         # Place the Kaggle dataset here (after unzip)
+│   └── init-multi-db.sql        # SQL init script for PostgreSQL
+├── grafana_provisioning/        # Grafana dashboards, datasources, alerting config
+├── models/                      # Saved features and preprocessing artifacts
+├── notebooks/                   # EDA and exploratory analysis notebooks
+├── output/                      # Output files from model runs (optional)
+├── reports/                     # Monitoring reports (drift, quality, performance)
+├── src/customer_churn_mlops/    # Core Python package
+│   ├── flows/                   # Prefect flows (ETL, training, inference, monitoring)
+│   ├── inference/               # Inference logic
+│   ├── training/                # Training utilities
+│   └── utils/                   # Helper functions
+├── .env.docker                  # Docker-specific environment variables
+├── docker-compose.yaml          # Orchestration of all services
+├── Dockerfile                   # Base image for custom tasks
+├── Dockerfile.mlflow            # MLflow-specific Docker image
+├── .python-version              # Python version for pyenv
+├── poetry.lock / pyproject.toml # Dependency management (Poetry)
+├── Makefile                     # Automation commands (build, run, clean, logs)
+└── LICENSE
+```
+
+> ⚠️ **Important:**  
+To run this project, download the dataset from [Kaggle](https://www.kaggle.com/datasets/safrin03/predictive-analytics-for-customer-churn-dataset/data), unzip it, and place the files in the `data/` folder.
+
+
 
 ## 🛠️ Installation
 
