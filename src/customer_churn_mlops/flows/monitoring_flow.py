@@ -47,6 +47,9 @@ def load_evaluation_dataset(db_url: str = DB_URL) -> pd.DataFrame:
 
     df.drop(columns=['customer_id'], inplace=True)
 
+    print("Loaded df")
+    print(df.head())
+
     return df
 
 
@@ -74,6 +77,11 @@ def generate_reports(reference_df: pd.DataFrame, current_df: pd.DataFrame, data_
     # Evidently Datasets
     ref_dataset = Dataset.from_pandas(reference_df, data_definition=data_def)
     curr_dataset = Dataset.from_pandas(current_df, data_definition=data_def)
+
+    print("ref")
+    print(reference_df.head())
+    print("curr")
+    print(current_df.head())
 
     # Drift report
     drift_report = Report([

@@ -78,7 +78,7 @@ def load_churn_data_flow(
     kaggle_path: str = "data/",
     csv_filename: str = "train.csv",
     using_kaggle: bool = False,
-    reset_db: bool = True,
+    reset_db: bool = False,
 ):
     if reset_db:
         truncate_tables(DB_URL)
