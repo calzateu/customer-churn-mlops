@@ -47,5 +47,22 @@ services:
       --backend-store-uri postgresql://${MLFLOW_USER:-mlflow_user}:${MLFLOW_PASS:-mlflowpass}@postgres:5432/mlflow_db"
     restart: unless-stopped
 
+  flows:
+    build:
+      context: .
+    env_file:
+      - .env.docker
+    depends_on:
+      - mlflow
+      - prefect-server
+    environment:
+      PREFECT_API_URL: http://prefect-server:4200/api
+      MLFLOW_TRACKING_URI: http://mlflow:5000
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./output:/app/output
+    restart: on-failure
+
 volumes:
   pgdata:

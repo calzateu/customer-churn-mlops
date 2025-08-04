@@ -17,10 +17,11 @@ restart:
 logs:
 	docker compose logs -f
 
-# Complete cleanup: volumes, images, network
+# Complete cleanup: volumes, images, network, folders
 clean:
 	docker compose down --volumes --remove-orphans
 	docker system prune -f
+	rm -rf ./mlartifacts
 
 # See services status
 ps:
