@@ -26,6 +26,7 @@ dependencies = [
     "sqlalchemy (>=2.0.42,<3.0.0)",
     "psycopg2-binary (>=2.9.10,<3.0.0)",
     "kaggle (>=1.7.4.5,<2.0.0.0)",
+    "evidently (>=0.7.11,<0.8.0)",
 ]
 
 

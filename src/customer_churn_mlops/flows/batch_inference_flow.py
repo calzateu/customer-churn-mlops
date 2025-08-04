@@ -2,12 +2,17 @@
 from prefect import task, flow
 from prefect.tasks import NO_CACHE
 
+import pandas as pd
+
 import os
 from mlflow.tracking import MlflowClient
-from customer_churn_mlops.inference.model_loader import load_model, load_preprocessor, load_features
+from customer_churn_mlops.inference.model_loader import load_sklearn_model, load_preprocessor, load_features
 from customer_churn_mlops.inference.batch_predictor import predict_and_save
 from customer_churn_mlops.utils.data_processing import read_data, prepare_data
 from customer_churn_mlops.utils.mlflow_configs import setup_mlflow
+
+from sqlalchemy import create_engine
+from customer_churn_mlops.utils.config import DB_URL
 
 @task(name="setup-mlflow", retries=3, retry_delay_seconds=2)
 def setup_mlflow_task(tracking_uri: str, experiment_name: str):
@@ -19,7 +24,7 @@ def get_model_version_task(client: MlflowClient, model_name: str, stage: str):
 
 @task(name="load-model", retries=3, retry_delay_seconds=2, cache_policy=NO_CACHE)
 def load_model_task(model_name, model_version):
-    return load_model(model_name, model_version)
+    return load_sklearn_model(model_name, model_version)
 
 @task(name="load-preprocessor", retries=3, retry_delay_seconds=2)
 def load_preprocessor_task(client, run_id):
@@ -43,6 +48,15 @@ def batch_inference_task(
 ):
     return predict_and_save(model, X, customer_ids, output_file)
 
+@task(name="insert-predictions-into-db")
+def insert_predictions_into_db(pred_df: pd.DataFrame):
+    engine = create_engine(DB_URL)
+    subset = pred_df[["customer_id", "churn", "churn_probability"]].copy()
+    subset["churn"] = subset["churn"].astype(bool)
+    subset.to_sql("predictions_history", engine, if_exists="append", index=False)
+    print(f"✅ Inserted {len(subset)} predictions into 'predictions_history'")
+
+
 @flow(name="customer-churn-batch-inference", log_prints=True)
 def batch_inference_flow(
     input_file: str = "data/test.csv",
@@ -63,7 +77,8 @@ def batch_inference_flow(
     df = read_data_task(input_file)
     X, _, customer_ids = prepare_data_task(df, preprocessor, features)
 
-    batch_inference_task(model, X, customer_ids, output_file)
+    pred_df = batch_inference_task(model, X, customer_ids, output_file)
+    insert_predictions_into_db(pred_df)
 
 if __name__ == "__main__":
     batch_inference_flow()

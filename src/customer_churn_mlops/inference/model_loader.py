@@ -1,11 +1,12 @@
 import pickle
 import json
-import mlflow
+from mlflow.sklearn import load_model
 from mlflow.tracking import MlflowClient
 
-def load_model(model_name, model_version):
+def load_sklearn_model(model_name, model_version):
     model_uri = f"models:/{model_name}/{model_version.version}"
-    return mlflow.pyfunc.load_model(model_uri)
+    #return mlflow.pyfunc.load_model(model_uri)
+    return load_model(model_uri)
 
 def load_preprocessor(client: MlflowClient, run_id: str, path='preprocessor/preprocessor.pkl'):
     scaler_path = client.download_artifacts(run_id=run_id, path=path)
