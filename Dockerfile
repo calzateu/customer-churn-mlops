@@ -28,4 +28,4 @@ RUN poetry config virtualenvs.create false && poetry install --no-root
 # Copy the rest of the application
 COPY . .
 
-CMD ["poetry", "run", "python", "src/customer_churn_mlops/flows/launch_flows.py"]
+CMD ["poetry", "run", "python", "src/customer_churn_mlops/launch_flows.py"]
