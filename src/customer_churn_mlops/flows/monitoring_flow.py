@@ -78,11 +78,6 @@ def generate_reports(reference_df: pd.DataFrame, current_df: pd.DataFrame, data_
     ref_dataset = Dataset.from_pandas(reference_df, data_definition=data_def)
     curr_dataset = Dataset.from_pandas(current_df, data_definition=data_def)
 
-    print("ref")
-    print(reference_df.head())
-    print("curr")
-    print(current_df.head())
-
     # Drift report
     drift_report = Report([
         ColumnCount(),

@@ -22,6 +22,14 @@ Everything is modular and production-ready, making it easy to manage, scale, and
 
 ---
 
+## 🧭 Architecture Overview
+
+The following diagram illustrates the high-level architecture of this MLOps project:
+
+![Architecture Diagram](images/architecture_diagram.png)
+
+---
+
 ## 📊 Dataset
 
 Based on [this Kaggle dataset](https://www.kaggle.com/datasets/safrin03/predictive-analytics-for-customer-churn-dataset/data), it includes features like:
@@ -104,9 +112,12 @@ Artifacts from MLflow are stored in `./mlartifacts`.
 
 ---
 
-### ▶️ Run a specific flow manually
+### ▶️ Run flows
 
-You can run any Prefect flow script using:
+You can manually run any Prefect flow script using:
+
+> ⚠️ **Important:**  
+Manual runs will not be displayed in Prefect UI. It is recommended to run flows from Prefect UI.
 
 ```bash
 poetry run python src/customer_churn_mlops/flows/<desired_flow>.py
