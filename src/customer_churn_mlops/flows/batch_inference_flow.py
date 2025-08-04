@@ -59,7 +59,7 @@ def insert_predictions_into_db(pred_df: pd.DataFrame):
 
 @flow(name="customer-churn-batch-inference", log_prints=True)
 def batch_inference_flow(
-    input_file: str = "data/test.csv",
+    input_file: str = "data/train.csv",
     output_file: str = "output/predictions.csv",
     model_name: str = "customer-churn-model",
     stage: str = "production",

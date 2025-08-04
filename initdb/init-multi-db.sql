@@ -20,7 +20,6 @@ ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO mlflow_user;
 \connect myapp_db
 
 GRANT ALL ON SCHEMA public TO myapp_user;
-GRANT USAGE, SELECT ON SEQUENCE predictions_history_id_seq TO myapp_user;
 ALTER SCHEMA public OWNER TO myapp_user;
 ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO myapp_user;
 
@@ -59,8 +58,21 @@ CREATE TABLE users_churn_data (
 -- To store historical predictions per user
 CREATE TABLE predictions_history (
   id SERIAL PRIMARY KEY,
-  customer_id TEXT REFERENCES users(customer_id),
+  customer_id TEXT, --REFERENCES users(customer_id),
   churn BOOLEAN,
   churn_probability FLOAT,
   predicted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+GRANT USAGE, SELECT ON SEQUENCE predictions_history_id_seq TO myapp_user;
+
+CREATE TABLE evidently_reports (
+  id SERIAL PRIMARY KEY,
+  report_type TEXT NOT NULL,  -- 'drift', 'performance', 'quality'
+  report_json JSONB NOT NULL,
+  generated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+GRANT USAGE, SELECT, UPDATE ON SEQUENCE evidently_reports_id_seq TO myapp_user;
+
+

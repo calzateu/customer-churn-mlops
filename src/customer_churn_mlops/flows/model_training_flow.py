@@ -92,7 +92,7 @@ def preprocessing_task(df, features, target="Churn"):
     return (
         X_train_filtered, y_train,
         X_test_filtered, y_test,
-        preprocessor
+        preprocessor, X_train
     )
 
 
@@ -131,6 +131,14 @@ def register_model_in_mlflow_task(client, experiment_name, run_id, model_name, s
         alias=stage
     )
 
+@task(name="save-train-reference-dataset", retries=3, retry_delay_seconds=2)
+def save_train_reference_dataset(X_train: pd.DataFrame, X_train_filtered: pd.DataFrame, y: pd.Series, model, path: str = "data/train_reference.csv"):
+    X_train["actual"] = y
+    X_train["prediction"] = model.predict(X_train_filtered)
+    X_train["churn_probability"] = model.predict_proba(X_train_filtered)[:, 1]
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    X_train.to_csv(path, index=False)
+    print(f"✅ Saved enriched reference dataset to {path}")
 
 @flow(name="customer-churn-model-training", log_prints=True)
 def train_model_flow(
@@ -148,15 +156,17 @@ def train_model_flow(
     df = read_data_task(data_path)
     features_path = save_features_task(features, "../models")
 
-    X_train_filtered, y_train, X_test_filtered, y_test, preprocessor = preprocessing_task(df, features)
+    X_train_filtered, y_train, X_test_filtered, y_test, preprocessor, X_train = preprocessing_task(df, features)
     preprocessor_path = save_preprocessor_task(preprocessor, "../models")
 
-    _, run_id = train_model(
+    model, run_id = train_model(
         X_train_filtered, y_train, X_test_filtered, y_test,
         preprocessor_path, features_path
     )
 
     register_model_in_mlflow_task(client, experiment_name, run_id, model_name, stage)
+
+    save_train_reference_dataset(X_train, X_train_filtered, y_train, model)
 
 
 if __name__ == "__main__":
