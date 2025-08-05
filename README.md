@@ -138,6 +138,9 @@ After running `make up`, you can access the following services in your browser:
 
 ### ▶️ Run flows
 
+⚠️ **Important:**
+For each of the flows to work, the order of execution must be: data ingestion -> training -> batch predict -> monitoring
+
 You can manually run any Prefect flow script using:
 
 > ⚠️ **Important:**  
