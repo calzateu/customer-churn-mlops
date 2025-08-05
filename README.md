@@ -112,6 +112,28 @@ Artifacts from MLflow are stored in `./mlartifacts`.
 
 ---
 
+### ▶️ Run flows
+
+⚠️ **Important:**
+For each of the flows to work, the order of execution must be: data ingestion -> training -> batch predict -> monitoring
+
+You can manually run any Prefect flow script using:
+
+> ⚠️ **Important:**  
+Manual runs will not be displayed in Prefect UI. It is recommended to run flows from Prefect UI.
+
+```bash
+poetry run python src/customer_churn_mlops/flows/<desired_flow>.py
+```
+
+Replace `<desired_flow>` with the actual flow filename, e.g.:
+
+```bash
+poetry run python src/customer_churn_mlops/flows/model_training_flow.py
+```
+
+---
+
 ## 🌐 Service Access & Ports
 
 After running `make up`, you can access the following services in your browser:
@@ -133,28 +155,6 @@ After running `make up`, you can access the following services in your browser:
 | 4200 | Prefect UI    | `localhost:4200`    |
 | 3000 | Prefect API   | `localhost:3000`    |
 | 3001 | Grafana       | `localhost:3001`    |
-
----
-
-### ▶️ Run flows
-
-⚠️ **Important:**
-For each of the flows to work, the order of execution must be: data ingestion -> training -> batch predict -> monitoring
-
-You can manually run any Prefect flow script using:
-
-> ⚠️ **Important:**  
-Manual runs will not be displayed in Prefect UI. It is recommended to run flows from Prefect UI.
-
-```bash
-poetry run python src/customer_churn_mlops/flows/<desired_flow>.py
-```
-
-Replace `<desired_flow>` with the actual flow filename, e.g.:
-
-```bash
-poetry run python src/customer_churn_mlops/flows/model_training_flow.py
-```
 
 ---
 
